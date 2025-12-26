@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+.screen {
+  @apply min-h-screen flex items-center justify-center bg-white dark:bg-neutral-900;
+}
+
+.container {
+  @apply w-full max-w-screen px-4;
+}
