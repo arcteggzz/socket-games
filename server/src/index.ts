@@ -66,6 +66,10 @@ async function removePlayer(code: string, id: string) {
   await db.collection("rooms").doc(code).collection("players").doc(id).delete();
 }
 
+app.get("/api/health", async (req, res) => {
+  res.json("Socket Games is running");
+});
+
 app.post("/api/rooms", async (req, res) => {
   const { name } = req.body || {};
   console.log(name);
