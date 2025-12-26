@@ -31,7 +31,8 @@ export default function Waiting() {
             username: string;
             playerId: string;
           };
-          if (playerId) {
+          const currentPlayerId = sessionStorage.getItem("playerId") || "";
+          if (playerId && !currentPlayerId) {
             sessionStorage.setItem("playerId", playerId);
           }
           setPlayers((prev) =>
@@ -63,7 +64,8 @@ export default function Waiting() {
             code: string;
             playerId: string;
           };
-          if (playerId) {
+          const currentPlayerId = sessionStorage.getItem("playerId") || "";
+          if (playerId && !currentPlayerId) {
             sessionStorage.setItem("playerId", playerId);
           }
         }

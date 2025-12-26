@@ -3,9 +3,11 @@ import Button from "../../components/Button";
 import Card from "../../components/Card";
 import DarkModeToggle from "../../components/DarkModeToggle";
 import routePaths from "../../utils/routePaths";
+import {  useState } from "react";
 
 export default function EntryMenu() {
   const navigate = useNavigate();
+  const [currentPlayerId,setCurrentPlyerId] = useState(sessionStorage.getItem("playerId") ? "Existing Player" : "New Player")
 
   return (
     <div className="flex flex-col gap-6">
@@ -13,6 +15,19 @@ export default function EntryMenu() {
         <div className="text-2xl font-bold">Games</div>
         <DarkModeToggle />
       </div>
+
+      <Card>
+          <div className="flex items-center justify-between">
+            <div>
+            <div className="font-medium">Player Id</div>
+            <div className="font-sm">{currentPlayerId}</div>
+            </div>
+            <Button variant="primary" onClick={()=>{
+              sessionStorage.removeItem("playerId")
+              setCurrentPlyerId("New Player")
+            }}>Reset</Button>
+          </div>
+        </Card>
 
       <div className="grid gap-4">
         <Card onClick={() => navigate(routePaths.createRoom)}>

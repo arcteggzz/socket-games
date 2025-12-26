@@ -4,15 +4,18 @@ import Button from "../../components/Button";
 import Modal from "../../components/Modal";
 import QRCode from "react-qr-code";
 import { joinUrl } from "../../utils/api";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import useWebSocket from "react-use-websocket";
+import routePaths from "../../utils/routePaths";
 type ServerMessage = { type: string; payload?: unknown };
+
 
 export default function Master() {
   const [params] = useSearchParams();
   const code = useMemo(() => params.get("game-code") || "", [params]);
   const [players, setPlayers] = useState<Array<PlayerSummary>>([]);
   const [openQR, setOpenQR] = useState(false);
+  const navigate = useNavigate()
   const serverUrl = import.meta.env.VITE_SERVER_URL || "ws://localhost:3001";
   const { sendJsonMessage } = useWebSocket<ServerMessage>(serverUrl.replace("http", "ws"), {
     share: true,
@@ -53,7 +56,15 @@ export default function Master() {
 
   return (
     <div className="grid gap-4">
-      <div className="text-xl font-semibold">Games Master</div>
+      <div className="text-xl font-semibold flex justify-between items-center">
+        <div>Games Master</div>
+        <Button
+          variant="ghost"
+          onClick={() => navigate(routePaths.root)}
+        >
+          Home
+        </Button>
+      </div>
 
 
       {/* Room details */}

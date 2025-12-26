@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
+import Card from "../../components/Card";
 import { getRoomByCode, waitingUrl } from "../../utils/api";
 import useWebSocket from "react-use-websocket";
 import routePaths from "../../utils/routePaths";
@@ -14,6 +15,8 @@ export default function JoinGame() {
   const [username, setUsername] = useState("");
   const [userCode, setUserCode] = useState("");
   const [room, setRoom] = useState<{ name: string } | null>(null);
+  const [currentPlayerId,setCurrentPlyerId] = useState(sessionStorage.getItem("playerId") ? "Existing Player" : "New Player")
+
 
   const { sendJsonMessage } = useWebSocket(serverUrl.replace("http", "ws"), {
     share: true,
@@ -43,6 +46,19 @@ export default function JoinGame() {
   return (
     <div className="grid gap-4">
       <div className="text-xl font-semibold">Join Game</div>
+
+      <Card>
+                <div className="flex items-center justify-between">
+                  <div>
+                  <div className="font-medium">Player Id</div>
+                  <div className="font-sm">{currentPlayerId}</div>
+                  </div>
+                  <Button variant="primary" onClick={()=>{
+                    sessionStorage.removeItem("playerId")
+                    setCurrentPlyerId("New Player")
+                  }}>Reset</Button>
+                </div>
+              </Card>
 
       {!code && (
         <input
