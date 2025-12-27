@@ -51,10 +51,16 @@ export default function CreateRoom() {
       />
 
       <div className="flex justify-center items-center space-x-4">
-        <Button onClick={() => navigate(routePaths.root)} variant="ghost">
+        <Button
+          onClick={() => navigate(routePaths.root)}
+          variant="ghost"
+          className="w-full"
+        >
           Cancel
         </Button>
-        <Button onClick={createRoom}>Create</Button>
+        <Button onClick={createRoom} className="w-full">
+          Create
+        </Button>
       </div>
 
       {roomCode && (
