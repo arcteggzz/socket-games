@@ -5,6 +5,7 @@ import useWebSocket from "react-use-websocket";
 import { joinUrl, masterUrl } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import QRCode from "react-qr-code";
+import routePaths from "../../utils/routePaths";
 
 type ServerMessage = {
   type: string;
@@ -49,7 +50,12 @@ export default function CreateRoom() {
         className="w-full border border-neutral-300 dark:border-neutral-700 rounded-md px-3 py-2 bg-white dark:bg-neutral-900"
       />
 
-      <Button onClick={createRoom}>Create</Button>
+      <div className="flex justify-center items-center space-x-4">
+        <Button onClick={() => navigate(routePaths.root)} variant="ghost">
+          Cancel
+        </Button>
+        <Button onClick={createRoom}>Create</Button>
+      </div>
 
       {roomCode && (
         <div className="grid gap-3">
