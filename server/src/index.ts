@@ -7,7 +7,7 @@ import { db } from "./firebase";
 import type { Player, Room } from "./types";
 
 const app = express();
-app.use(cors({ origin: ["*", "http://localhost:5173"], credentials: true }));
+app.use(cors({ origin: ["*", "http://localhost:5173", "https://socket-games-one.vercel.app"], credentials: true }));
 app.use(express.json());
 
 const httpServer = createServer(app);
