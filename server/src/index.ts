@@ -7,7 +7,16 @@ import { db } from "./firebase";
 import type { Player, Room } from "./types";
 
 const app = express();
-app.use(cors({ origin: ["*", "http://localhost:5173", "https://socket-games-one.vercel.app"], credentials: true }));
+app.use(
+  cors({
+    origin: [
+      "*",
+      "http://localhost:5173",
+      "https://socket-games-one.vercel.app",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const httpServer = createServer(app);
@@ -27,7 +36,9 @@ function generateCode() {
 
 function formatDateTime(d: Date) {
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`;
 }
 
 function send(ws: WebSocket, type: string, payload?: any) {
@@ -67,13 +78,14 @@ async function removePlayer(code: string, id: string) {
 }
 
 app.get("/api/health", async (req, res) => {
+  console.log(`Health Check fired at ${new Date().toISOString()}`);
   res.json("Socket Games is running");
 });
 
 app.post("/api/rooms", async (req, res) => {
   const { name } = req.body || {};
   console.log(name);
-  
+
   if (!name) return res.status(400).json({ error: "name_required" });
   const code = generateCode();
   const ownerId = randomUUID();
@@ -242,7 +254,10 @@ wss.on("connection", (ws) => {
       if (player) {
         state.players.delete(id);
         await removePlayer(code, id);
-        broadcast(state, "player_left", { username: player.username, playerId: id });
+        broadcast(state, "player_left", {
+          username: player.username,
+          playerId: id,
+        });
         console.log("[PLAYER_LEFT]", { code, username: player.username, id });
       }
     }
@@ -256,7 +271,10 @@ wss.on("connection", (ws) => {
       if (player) {
         state.players.delete(id);
         await removePlayer(code, id);
-        broadcast(state, "player_kicked", { username: player.username, playerId: id });
+        broadcast(state, "player_kicked", {
+          username: player.username,
+          playerId: id,
+        });
         console.log("[PLAYER_KICKED]", { code, username: player.username, id });
       }
     }

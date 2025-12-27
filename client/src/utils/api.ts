@@ -8,12 +8,12 @@ export async function getRoomByCode(code: string) {
   return res.json();
 }
 
-export type PlayerSummary = { username: string; id: string }
+export type PlayerSummary = { username: string; id: string };
 
 export async function getPlayersByCode(code: string): Promise<PlayerSummary[]> {
-  const res = await fetch(`${baseUrl}/api/rooms/${code}/players`)
-  if (!res.ok) return []
-  return res.json()
+  const res = await fetch(`${baseUrl}/api/rooms/${code}/players`);
+  if (!res.ok) return [];
+  return res.json();
 }
 
 export function joinUrl(code: string) {
@@ -32,4 +32,10 @@ export function waitingUrl(code: string) {
   return `${window.location.origin}${
     routePaths.waiting
   }?game-code=${encodeURIComponent(code)}`;
+}
+
+export async function getHealth(): Promise<string> {
+  const res = await fetch(`${baseUrl}/api/health`);
+  if (!res.ok) throw new Error("health_unavailable");
+  return res.json();
 }

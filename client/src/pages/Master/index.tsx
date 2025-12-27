@@ -9,43 +9,53 @@ import useWebSocket from "react-use-websocket";
 import routePaths from "../../utils/routePaths";
 type ServerMessage = { type: string; payload?: unknown };
 
-
 export default function Master() {
   const [params] = useSearchParams();
   const code = useMemo(() => params.get("game-code") || "", [params]);
   const [players, setPlayers] = useState<Array<PlayerSummary>>([]);
   const [openQR, setOpenQR] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const serverUrl = import.meta.env.VITE_SERVER_URL || "ws://localhost:3001";
-  const { sendJsonMessage } = useWebSocket<ServerMessage>(serverUrl.replace("http", "ws"), {
-    share: true,
-    filter: () => true,
-    onOpen: () => {
-      if (code) {
-        sendJsonMessage({ type: "subscribe_room", payload: { code } });
-      }
-    },
-    onMessage: (event) => {
-      const data = JSON.parse(event.data as string) as ServerMessage;
-      if (data.type === "player_joined" && data.payload) {
-        const { username, playerId } = data.payload as { username: string; playerId: string };
-        setPlayers((prev) =>
-          prev.some((p) => p.id === playerId) ? prev : [...prev, { username, id: playerId }]
-        );
-      }
-      if (
-        (data.type === "player_left" || data.type === "player_kicked") &&
-        data.payload
-      ) {
-        const { playerId } = data.payload as { username: string; playerId: string };
-        setPlayers((prev) => prev.filter((p) => p.id !== playerId));
-      }
-    },
-  });
+  const { sendJsonMessage } = useWebSocket<ServerMessage>(
+    serverUrl.replace("http", "ws"),
+    {
+      share: true,
+      filter: () => true,
+      onOpen: () => {
+        if (code) {
+          sendJsonMessage({ type: "subscribe_room", payload: { code } });
+        }
+      },
+      onMessage: (event) => {
+        const data = JSON.parse(event.data as string) as ServerMessage;
+        if (data.type === "player_joined" && data.payload) {
+          const { username, playerId } = data.payload as {
+            username: string;
+            playerId: string;
+          };
+          setPlayers((prev) =>
+            prev.some((p) => p.id === playerId)
+              ? prev
+              : [...prev, { username, id: playerId }]
+          );
+        }
+        if (
+          (data.type === "player_left" || data.type === "player_kicked") &&
+          data.payload
+        ) {
+          const { playerId } = data.payload as {
+            username: string;
+            playerId: string;
+          };
+          setPlayers((prev) => prev.filter((p) => p.id !== playerId));
+        }
+      },
+    }
+  );
 
-  function kickPlayer(playerId: string, code: string){
-    if (!playerId || !code) return
-    sendJsonMessage({ type: "kick_player", payload: { code, playerId } })
+  function kickPlayer(playerId: string, code: string) {
+    if (!playerId || !code) return;
+    sendJsonMessage({ type: "kick_player", payload: { code, playerId } });
   }
 
   useEffect(() => {
@@ -58,19 +68,19 @@ export default function Master() {
     <div className="grid gap-4">
       <div className="text-xl font-semibold flex justify-between items-center">
         <div>Games Master</div>
-        <Button
-          variant="ghost"
-          onClick={() => navigate(routePaths.root)}
-        >
+        <Button variant="ghost" onClick={() => navigate(routePaths.root)}>
           Home
         </Button>
       </div>
 
-
       {/* Room details */}
       <div className="rounded-xl shadow-soft border border-neutral-200 dark:border-neutral-800 p-4 space-y-2">
-        <div className="text-sm text-neutral-500 dark:text-neutral-400">Room Code</div>
-        <div className="text-2xl font-bold tracking-widest uppercase">{code}</div>
+        <div className="text-sm text-neutral-500 dark:text-neutral-400">
+          Room Code
+        </div>
+        <div className="text-2xl font-bold tracking-widest uppercase">
+          {code}
+        </div>
       </div>
 
       <div className="flex gap-2">
@@ -82,7 +92,7 @@ export default function Master() {
         </Button>
         <Button
           variant="ghost"
-          onClick={() => navigator.clipboard.writeText(joinUrl(code as string))}  
+          onClick={() => navigator.clipboard.writeText(joinUrl(code as string))}
         >
           Copy Link
         </Button>
@@ -109,7 +119,12 @@ export default function Master() {
               >
                 <td className="p-3">{p.username}</td>
                 <td className="p-3">
-                  <Button variant="ghost" onClick={()=>kickPlayer(p.id, code)}>Kick</Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => kickPlayer(p.id, code)}
+                  >
+                    Kick
+                  </Button>
                 </td>
               </tr>
             ))}

@@ -15,8 +15,9 @@ export default function JoinGame() {
   const [username, setUsername] = useState("");
   const [userCode, setUserCode] = useState("");
   const [room, setRoom] = useState<{ name: string } | null>(null);
-  const [currentPlayerId,setCurrentPlyerId] = useState(sessionStorage.getItem("playerId") ? "Existing Player" : "New Player")
-
+  const [currentPlayerId, setCurrentPlyerId] = useState(
+    sessionStorage.getItem("playerId") ? "Existing Player" : "New Player"
+  );
 
   const { sendJsonMessage } = useWebSocket(serverUrl.replace("http", "ws"), {
     share: true,
@@ -26,13 +27,16 @@ export default function JoinGame() {
   function join() {
     if (!username) return;
     if (!code && !userCode) return;
-    
+
     if (code) {
       sendJsonMessage({ type: "join_room", payload: { code: code, username } });
       navigate(waitingUrl(code));
     }
     if (userCode) {
-      sendJsonMessage({ type: "join_room", payload: { code: userCode, username } });
+      sendJsonMessage({
+        type: "join_room",
+        payload: { code: userCode, username },
+      });
       navigate(waitingUrl(userCode));
     }
   }
@@ -48,17 +52,22 @@ export default function JoinGame() {
       <div className="text-xl font-semibold">Join Game</div>
 
       <Card>
-                <div className="flex items-center justify-between">
-                  <div>
-                  <div className="font-medium">Player Id</div>
-                  <div className="font-sm">{currentPlayerId}</div>
-                  </div>
-                  <Button variant="primary" onClick={()=>{
-                    sessionStorage.removeItem("playerId")
-                    setCurrentPlyerId("New Player")
-                  }}>Reset</Button>
-                </div>
-              </Card>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="font-medium">Player Id</div>
+            <div className="font-sm">{currentPlayerId}</div>
+          </div>
+          <Button
+            variant="primary"
+            onClick={() => {
+              sessionStorage.removeItem("playerId");
+              setCurrentPlyerId("New Player");
+            }}
+          >
+            Reset
+          </Button>
+        </div>
+      </Card>
 
       {!code && (
         <input
