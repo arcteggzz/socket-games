@@ -5,6 +5,9 @@ import { WebSocketServer, WebSocket } from "ws";
 import { randomUUID } from "crypto";
 import { db } from "./firebase";
 import type { Player, Room } from "./types";
+interface WebhookRequest extends Request {
+  rawBody?: Buffer;
+}
 
 const app = express();
 app.use(
@@ -15,7 +18,7 @@ app.use(
       "https://socket-games-one.vercel.app",
     ],
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 
@@ -37,7 +40,7 @@ function generateCode() {
 function formatDateTime(d: Date) {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
-    d.getHours()
+    d.getHours(),
   )}:${pad(d.getMinutes())}`;
 }
 
@@ -140,7 +143,7 @@ app.get("/api/rooms/:code/players", async (req, res) => {
       Array.from(state.players.values()).map((p) => ({
         username: p.username,
         id: p.id,
-      }))
+      })),
     );
   }
   if (db) {
@@ -153,10 +156,32 @@ app.get("/api/rooms/:code/players", async (req, res) => {
       snap.docs.map((d) => ({
         username: d.data().username,
         id: d.data().id ?? d.id,
-      }))
+      })),
     );
   }
   res.json([]);
+});
+
+app.post("/api/webhook/embedly", async (req, res) => {
+  const signature = req.headers["x-embedly-signature"] as string | undefined;
+  const forwardedIp = req.headers["x-forwarded-for"] as string | undefined;
+  const ip = req.ip as string | undefined;
+
+  console.log({ event: req.body?.event }, "Webhook: received Embedly webhook");
+
+  console.log("[WEBHOOK] body", req.body, new Date().toISOString());
+  (console.log("[WEBHOOK] signature", signature), new Date().toISOString());
+  console.log("[WEBHOOK] ip", ip, new Date().toISOString());
+  console.log("[WEBHOOK] forwarded ip", forwardedIp, new Date().toISOString());
+
+  res.status(200).json({
+    status: "success",
+    message: "Webhook received and verified",
+    ip,
+    forwardedIp,
+    signature,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 wss.on("connection", (ws) => {
