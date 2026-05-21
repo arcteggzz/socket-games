@@ -163,17 +163,54 @@ app.get("/api/rooms/:code/players", async (req, res) => {
 });
 
 app.post("/api/proxy", async (req, res) => {
+  const requestId = randomUUID();
+  const startTime = Date.now();
+  console.log(`[PROXY][${requestId}] ── incoming request ──────────────────────`);
+  console.log(`[PROXY][${requestId}] timestamp:`, new Date().toISOString());
+  console.log(`[PROXY][${requestId}] raw body:`, JSON.stringify(req.body, null, 2));
+
   const { url, body, headers } = req.body || {};
-  if (!url) return res.status(400).json({ error: "url_required" });
+
+  if (!url) {
+    console.warn(`[PROXY][${requestId}] missing url — rejecting request`);
+    return res.status(400).json({ error: "url_required" });
+  }
+
+  const outgoingHeaders = { "Content-Type": "application/json", ...headers };
+  console.log(`[PROXY][${requestId}] target url:`, url);
+  console.log(`[PROXY][${requestId}] outgoing headers:`, JSON.stringify(outgoingHeaders, null, 2));
+  console.log(`[PROXY][${requestId}] outgoing body:`, body ? JSON.stringify(body, null, 2) : "(none)");
+  console.log(`[PROXY][${requestId}] firing fetch...`);
+
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...headers },
+      headers: outgoingHeaders,
       body: body ? JSON.stringify(body) : undefined,
     });
-    const data = await response.json().catch(() => null);
+
+    const elapsed = Date.now() - startTime;
+    console.log(`[PROXY][${requestId}] ── response received ─────────────────────`);
+    console.log(`[PROXY][${requestId}] status:`, response.status, response.statusText);
+    console.log(`[PROXY][${requestId}] elapsed:`, `${elapsed}ms`);
+    console.log(`[PROXY][${requestId}] response headers:`, JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2));
+
+    const data = await response.json().catch((e) => {
+      console.warn(`[PROXY][${requestId}] failed to parse response as JSON:`, e?.message);
+      return null;
+    });
+    console.log(`[PROXY][${requestId}] response body:`, JSON.stringify(data, null, 2));
+    console.log(`[PROXY][${requestId}] ── done ──────────────────────────────────`);
+
     res.status(response.status).json({ status: response.status, data });
   } catch (err: any) {
+    const elapsed = Date.now() - startTime;
+    console.error(`[PROXY][${requestId}] ── fetch error ───────────────────────────`);
+    console.error(`[PROXY][${requestId}] elapsed:`, `${elapsed}ms`);
+    console.error(`[PROXY][${requestId}] error name:`, err?.name);
+    console.error(`[PROXY][${requestId}] error message:`, err?.message);
+    console.error(`[PROXY][${requestId}] error stack:`, err?.stack);
+    console.error(`[PROXY][${requestId}] ─────────────────────────────────────────`);
     res.status(500).json({ error: err?.message ?? "fetch_failed" });
   }
 });
