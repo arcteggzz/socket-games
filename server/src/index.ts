@@ -162,6 +162,22 @@ app.get("/api/rooms/:code/players", async (req, res) => {
   res.json([]);
 });
 
+app.post("/api/proxy", async (req, res) => {
+  const { url, body, headers } = req.body || {};
+  if (!url) return res.status(400).json({ error: "url_required" });
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...headers },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await response.json().catch(() => null);
+    res.status(response.status).json({ status: response.status, data });
+  } catch (err: any) {
+    res.status(500).json({ error: err?.message ?? "fetch_failed" });
+  }
+});
+
 app.post("/api/webhook/embedly", async (req, res) => {
   const signature = req.headers["x-embedly-signature"] as string | undefined;
   const forwardedIp = req.headers["x-forwarded-for"] as string | undefined;
